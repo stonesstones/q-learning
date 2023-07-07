@@ -14,18 +14,18 @@ class EnvConfig:
     domain: str = "pendulum"
     task: str = "swingup"
     num_digitized: int = 16
-    num_action: int = 4
+    num_action: int = 2
     state_size: int = num_digitized**2
     gamma: float = 0.99
     alpha: float = 0.5
-    max_episode: int = int(10e7)
-    episode_length: int = 200
-    should_log_model: int = (10e4)
-    should_log_scalar: int = int(10e2)
-    should_log_video: int = int(5*10e2)
+    max_episode: int = int(10e3)
+    episode_length: int = 400
+    should_log_model: int = (10e3)
+    should_log_scalar: int = int(10)
+    should_log_video: int = int(50)
     restore: bool = False
     restore_file: str = "Qtable.npy"
-    video_length: int = 200
+    video_length: int = 400
     logdir: str = "./logs/" + str(time.strftime("%Y-%m-%d-%H-%M-%S")) + "/"
 
 class Agent():
@@ -74,6 +74,8 @@ def main():
         
         if episode % config.should_log_video == 0:
             env.reset()
+            env._env.physics.data.qpos[0] = np.pi
+            state, _, _, _ = env.step(0)
             eval_reward = 0
             img_arr = []
             for _ in range(config.video_length):

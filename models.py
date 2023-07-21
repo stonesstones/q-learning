@@ -11,17 +11,23 @@ class Qtable():
             restore_file_path = config.logdir + config.restore_file
             self._Qtable = np.load(restore_file_path)
     
-    def get_action(self, state, explore=True, method="softmax"):
+    def get_action(self, state, explore=True, global_step=None, method="softmax"):
         if method == "softmax":
             if explore:
-                prob = softmax(self._Qtable[state])[0]
+                prob = softmax(self._Qtable[state])
                 next_action = np.random.choice(self.action_arr, p=prob)
             else:
-                max_action = np.where(self._Qtable[state][0] == np.max(self._Qtable[state]))[0]
+                max_action = np.where(self._Qtable[state] == np.max(self._Qtable[state]))[0]
                 next_action = np.random.choice(max_action)
             return next_action
-        else:
-            pass
+        elif method == "epsilon-greedy":
+            if explore:
+                pass
+            else:
+                pass
+        elif method == "random":
+            next_action = np.random.choice(self.action_arr)
+            return next_action
     
     def update_Qtable(self, state, action, reward, next_state):
         next_maxQ = np.max(self._Qtable[next_state])

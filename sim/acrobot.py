@@ -77,7 +77,11 @@ class Physics(mujoco.Physics):
 
   def orientations(self):
     """Returns the sines and cosines of the pole angles."""
-    return np.concatenate((self.horizontal(), self.vertical()))
+    elbow_rad = self.named.data.qpos['elbow']
+    elbow_cos, elbow_sin = np.cos(elbow_rad), np.sin(elbow_rad)
+    shoulder_rad = self.named.data.qpos['shoulder']
+    shoulder_cos, shoulder_sin = np.cos(shoulder_rad), np.sin(shoulder_rad)
+    return np.concatenate((shoulder_cos, shoulder_sin, elbow_cos, elbow_sin))
 
 
 class Balance(base.Task):
@@ -104,7 +108,9 @@ class Balance(base.Task):
       physics: An instance of `Physics`.
     """
     physics.named.data.qpos[
-        ['shoulder', 'elbow']] = self.random.uniform(-0, 0, 2)
+        ['elbow']] = self.random.uniform(-0.5*np.pi, 0.5*np.pi, 1)   
+    physics.named.data.qpos[
+        ['shoulder']] = self.random.uniform(-0, 0, 1)
     # self.random.uniform(-np.pi, np.pi, 2)
     super().initialize_episode(physics)
 

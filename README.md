@@ -19,13 +19,13 @@ train.pyのEnvConfigの値を適宜変更する。
 
 ```python
 class EnvConfig:
-    domain: str = "double_pendulum"     #single_pendulumか、double_pendulum
-    task: str = "swingup"               #swingupしかない
-    num_digitized: int = 16             #１つの値を何分割するか
-    num_action: int = 2                 #actionの分割数
-    state_size: int = num_digitized**4  #状態の総数
-    gamma: float = 0.99                 # epsilon-greedyのパラメータ
-    alpha: float = 0.5                  # epsilon-greedyのパラメータ
+    domain: str = "double_pendulum"     # single_pendulumか、double_pendulum
+    task: str = "swingup"               # swingupしかない
+    num_digitized: int = 16             # １つの値を何分割するか
+    num_action: int = 2                 # actionの分割数
+    state_size: int = num_digitized**4  # 状態の総数
+    gamma: float = 0.99                 # 割引率
+    alpha: float = 0.5                  # qtableの更新率
     max_episode: int = int(10e7)        # 学習するエピソードの総数
     episode_length: int = 400           # １エピソードの長さ
     should_log_model: int = 10000       # 何ステップごとにqtableを保存するか

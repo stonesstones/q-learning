@@ -14,6 +14,12 @@ pip3 install tensorboard dm-control torch torchvision torchaudio opencv-python
 python train.py
 ```
 
+## tensorboard
+学習状況を見る
+```bash
+tensorboard --logdir ./logs
+```
+
 ## Args
 train.pyのEnvConfigの値を適宜変更する。
 

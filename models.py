@@ -10,7 +10,7 @@ class Qtable():
         if config.restore:
             restore_file_path = config.logdir + config.restore_file
             self._Qtable = np.load(restore_file_path)
-    
+    # 行動の選択
     def get_action(self, state, explore=True, global_step=None, method="softmax"):
         if method == "softmax":
             if explore:

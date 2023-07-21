@@ -12,16 +12,16 @@ import time
 class EnvConfig:
     domain: str = "double_pendulum"
     task: str = "swingup"
-    num_digitized: int = 16 #１つの値を何分割するか
+    num_digitized: int = 16
     num_action: int = 2
-    state_size: int = num_digitized**4 #状態の総数
+    state_size: int = num_digitized**4
     gamma: float = 0.99
     alpha: float = 0.5
     max_episode: int = int(10e7)
     episode_length: int = 400
     should_log_model: int = 10000
-    should_log_scalar: int = int(100)
-    should_log_video: int = int(10000)
+    should_log_scalar: int = 100
+    should_log_video: int = 10000
     restore: bool = False
     restore_file: str = "Qtable.npy"
     video_length: int = 400
@@ -52,6 +52,7 @@ def main():
         qtable = np.load(config.restore_file)
         agent._qtable._Qtable = qtable
 
+    # ランダムな行動を使ってQtableを初期化
     for i in range(100):
         state = env.reset()
         for step in range(400):
@@ -61,8 +62,11 @@ def main():
             state = next_state
             if done:
                 break
+
     # main training loop
     for episode in range(config.max_episode):
+
+        # １エピソードの実行
         state = env.reset()
         episode_reward = 0
         for step in range(config.episode_length):
@@ -73,17 +77,17 @@ def main():
             state = next_state
             if done:
                 break
-        
+        # スカラーをログに保存
         if episode % config.should_log_scalar == 0:
             print(f"\nepisode: {episode}, episode_reward: {episode_reward}")
             logger.add_scalars(OrderedDict([
                 ("episode_reward", episode_reward),
             ]))
-
+        # qtableを保存
         if episode % config.should_log_model == 0:
             save_file = config.logdir + f"qtable_{episode}.npy"
             np.save(save_file, qtable)
-        
+        # 評価と動画の保存
         if episode % config.should_log_video == 0:
             env.reset()
             env._env.physics.data.qpos[1] = np.pi

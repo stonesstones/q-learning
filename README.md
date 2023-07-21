@@ -23,6 +23,7 @@ tensorboard --logdir ./logs
 ## Args
 train.pyのEnvConfigの値を適宜変更する。
 
+注意点: shouderの角度の分割数は0.5*num_digitized
 ```python
 class EnvConfig:
     domain: str = "double_pendulum"     # single_pendulumか、double_pendulum
@@ -44,9 +45,10 @@ class EnvConfig:
 ```
 
 ## Simulator
-`sim/acrobot.py`のinitialize_episode関数を変更することで初期値を設定できる。（デフォルトではelbowの角度が$[-0.5\pi, 0.5\pi]$の間のランダムな値で、shouderの角度が$0$）
+`sim/acrobot.py`のinitialize_episode関数を変更することで初期値を設定できる。（デフォルトではelbowの角度が$`[-0.5\pi, 0.5\pi]`$の間のランダムな値で、shouderの角度が$`0`$）
 
 `sim/acrobot.xml`を変えることで、物体の重さ、長さ、ジョイントのダンピングや摩擦を変更できる。
+
 具体的には、下の表に対応する数値を下のコードの対応する位置に入れる。
 
 | パラメータ | upper arm | lower arm |

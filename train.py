@@ -1,9 +1,8 @@
 import numpy as np
-from pathlib import Path
 from dataclasses import dataclass
 import os
 
-from env import Env
+from env import make_env
 from models import Qtable
 from logger import Logger
 from collections import OrderedDict
@@ -11,18 +10,18 @@ import time
 
 @dataclass
 class EnvConfig:
-    domain: str = "pendulum"
+    domain: str = "double_pendulum"
     task: str = "swingup"
-    num_digitized: int = 16
+    num_digitized: int = 16 #１つの値を何分割するか
     num_action: int = 2
-    state_size: int = num_digitized**2
+    state_size: int = num_digitized**4 #状態の総数
     gamma: float = 0.99
     alpha: float = 0.5
-    max_episode: int = int(10e3)
+    max_episode: int = int(10e7)
     episode_length: int = 400
-    should_log_model: int = (10e3)
-    should_log_scalar: int = int(10)
-    should_log_video: int = int(50)
+    should_log_model: int = 10000
+    should_log_scalar: int = int(100)
+    should_log_video: int = int(10000)
     restore: bool = False
     restore_file: str = "Qtable.npy"
     video_length: int = 400
@@ -33,8 +32,8 @@ class Agent():
         self._config = config
         self._build_model()
 
-    def get_action(self, state, explore=True):
-        return self._qtable.get_action(state, explore)
+    def get_action(self, state, global_step=None, explore=True, method="softmax"):
+        return self._qtable.get_action(state, explore, global_step, method=method)
 
     def update_Qtable(self, state, action, reward, next_state):
         return self._qtable.update_Qtable(state, action, reward, next_state)
@@ -44,17 +43,30 @@ class Agent():
     
 def main():
     config = EnvConfig()
-    env = Env(config)
+    env = make_env(config)
     os.makedirs(config.logdir, exist_ok=True)
     logger = Logger(config.logdir)
     agent = Agent(config)
 
+    if config.restore:
+        qtable = np.load(config.restore_file)
+        agent._qtable._Qtable = qtable
+
+    for i in range(100):
+        state = env.reset()
+        for step in range(400):
+            action = agent.get_action(state, explore=True, method="random")
+            next_state, reward, done, _ = env.step(action)
+            qtable = agent.update_Qtable(state, action, reward, next_state)
+            state = next_state
+            if done:
+                break
     # main training loop
     for episode in range(config.max_episode):
         state = env.reset()
         episode_reward = 0
         for step in range(config.episode_length):
-            action = agent.get_action(state)
+            action = agent.get_action(state, logger.global_step)
             next_state, reward, done, _ = env.step(action)
             qtable = agent.update_Qtable(state, action, reward, next_state)
             episode_reward += reward
@@ -74,7 +86,7 @@ def main():
         
         if episode % config.should_log_video == 0:
             env.reset()
-            env._env.physics.data.qpos[0] = np.pi
+            env._env.physics.data.qpos[1] = np.pi
             state, _, _, _ = env.step(0)
             eval_reward = 0
             img_arr = []
